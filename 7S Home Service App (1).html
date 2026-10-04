@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>7S Home Service - Doorstep Repair, Cleaning, Painting (₹40/sq.ft) & Car Wash</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- React & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel CDN for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+              accent: '#38bdf8'
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 3s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' },
+              '100%': { boxShadow: '0 0 30px rgba(16, 185, 129, 0.6)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbars */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(217, 70, 239, 0.5);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px -8px rgba(217, 70, 239, 0.15);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #34d399 0%, #38bdf8 40%, #e879f9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-border {
+      position: relative;
+    }
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.5), rgba(217,70,239,0.5));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-fuchsia-500 selection:text-white min-h-screen">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo, useEffect, useRef } = React;
+
+    // --- SVG ICONS ---
+    const SearchIcon = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    );
+
+    const ShoppingBagIcon = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+    );
+
+    const StarIcon = ({ className = "w-4 h-4 text-amber-400 fill-amber-400" }) => (
+      <svg className={className} viewBox="0 0 20 20">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    );
+
+    const MapPinIcon = ({ className = "w-4 h-4 text-brand-400" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    );
+
+    const SparklesIcon = ({ className = "w-5 h-5 text-amber-300" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+    );
+
+    const HeartIcon = ({ filled = false, className = "w-5 h-5" }) => (
+      <svg className={`${className} transition-colors ${filled ? 'text-rose-500 fill-rose-500' : 'text-slate-400 hover:text-rose-400'}`} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 0c1.757 1.757 1.757 4.606 0 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z" />
+      </svg>
+    );
+
+    const PhoneIcon = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+      </svg>
+    );
+
+    const WhatsAppIcon = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.332 5.001L2 22l5.132-1.347a9.92 9.92 0 004.877 1.278h.005c5.505 0 9.988-4.478 9.989-9.984 0-2.668-1.038-5.176-2.925-7.063C17.19 3.037 14.68 2 12.012 2zm5.836 14.195c-.244.688-1.42 1.312-1.956 1.385-.503.068-1.157.102-1.85-.119-1.282-.41-2.903-1.291-4.272-2.502-1.579-1.396-2.684-3.178-2.982-3.69-.297-.512-.032-.788.225-1.045.232-.232.512-.602.768-.902.256-.3.341-.512.512-.853.17-.341.085-.64-.043-.9-.128-.256-1.139-2.744-1.56-3.758-.41-1.002-.828-.853-1.138-.868l-.969-.015c-.341 0-.896.128-1.365.64-.469.512-1.791 1.749-1.791 4.266 0 2.517 1.834 4.949 2.09 5.29.256.341 3.613 5.518 8.752 7.738 1.222.528 2.176.843 2.92.1.078.937.148 2.062-.085 2.83-.232.768-.98 1.28-1.956 1.385z" />
+      </svg>
+    );
+
+    const CheckCircleIcon = ({ className = "w-5 h-5 text-brand-400" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    );
+
+    const PaintRollerIcon = ({ className = "w-5 h-5 text-fuchsia-400" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+      </svg>
+    );
+
+    const ShieldCheckIcon = ({ className = "w-5 h-5 text-cyan-400" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    );
+
+    const ToolIcon = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+      </svg>
+    );
+
+    // --- CONSTANTS & DATA ---
+    const CONTACT_PHONE = "8799390827";
+    const CONTACT_EMAIL = "7shomeservice@gmail.com";
+    const WHATSAPP_LINK = "https://wa.me/qr/M52DGRSARXRPG1";
+
+    const CITIES = ['Morbi', 'Gandhidham', 'Rajkot', 'Jamnagar', 'Ahmedabad'];
+
+    const PROMO_OFFERS = [
+      { code: 'PAINT15', label: '15% OFF House Painting', desc: 'Valid on interior/exterior & waterproofing' },
+      { code: 'PEST20', label: '20% OFF Pest Control', desc: 'Valid on pest, termite & fumigation' },
+      { code: 'UCFIRST', label: '15% OFF First Booking', desc: 'Valid on your first 7S Home booking' },
+      { code: 'CLEAN100', label: 'Flat ₹100 OFF Repair & Cleaning', desc: 'Min order value ₹1,299' }
+    ];
+
+    const STANDARD_SAMAN_RATE_CARD = [
+      { item: "Full House Wall Painting Execution (Labor + Dust-Free Sanding)", rate: "₹40 / sq. ft.", category: "Painting" },
+      { item: "Asian Paints Apex / Royale Luxury Emulsion (1 Litre)", rate: "₹380 - ₹620 / Litre", category: "Painting" },
+      { item: "Waterproof Wall Putty (40kg Bag - Birla White/JK)", rate: "₹850 - ₹1,100 / bag", category: "Painting" },
+      { item: "Dr. Fixit Damp Block / Waterproof Sealer Coating", rate: "₹420 - ₹750 / Litre", category: "Painting" },
+      { item: "Wood & Metal Anti-Rust Gloss Enamel Paint", rate: "₹290 - ₹480 / Litre", category: "Painting" },
+      { item: "Standard 6A/16A Modular Switch & Socket", rate: "₹90 - ₹180 / pc", category: "Electrical" },
+      { item: "MCB Breaker Single Pole (16A - 32A)", rate: "₹180 - ₹320 / unit", category: "Electrical" },
+      { item: "Heavy Duty Copper Wire Roll (1.5 sq mm)", rate: "₹28 / meter", category: "Electrical" },
+      { item: "Brass Tap Spindle / Ceramic Disc Cartridge", rate: "₹150 - ₹280 / pc", category: "Plumbing" },
+      { item: "AC Refrigerant Copper Pipe (0.8mm wall)", rate: "₹280 / foot", category: "AC Repair" },
+      { item: "Sofa High-Density 32-Density Foam Sheet", rate: "₹1,200 / sheet", category: "Furniture" }
+    ];
+
+    const QUICK_SEARCH_CHIPS = [
+      'paint 40 rs per sq ft',
+      'house painting near me',
+      'wall waterproofing',
+      'electrician near me',
+      'plumber near me',
+      'ac repair near me',
+      'sofa repair home service',
+      'car wash home service'
+    ];
+
+    const CATEGORIES = [
+      { id: 'all', name: 'All Services', icon: '✨' },
+      { id: 'painting', name: 'Painting (₹40/sq.ft)', icon: '🎨' },
+      { id: 'electrical', name: 'Electrician', icon: '⚡' },
+      { id: 'plumbing', name: 'Plumber', icon: '🔧' },
+      { id: 'ac', name: 'AC & Appliances', icon: '❄️' },
+      { id: 'pest_control', name: 'Pest Control', icon: '🦟' },
+      { id: 'sofa_cleaning', name: 'Sofa & Cleaning', icon: '🛋️' },
+      { id: 'car_wash', name: 'Doorstep Car Wash', icon: '🚗' },
+      { id: 'carpentry', name: 'Carpentry & Wood', icon: '🪚' },
+    ];
+
+    const INITIAL_SERVICES = [
+      // --- PAINTING & WATERPROOFING ---
+      {
+        id: 301,
+        categoryId: 'painting',
+        name: 'Full Home Express Wall Painting (₹40 / Sq. Ft. Standard Rate)',
+        rating: 4.96,
+        reviewsCount: '68K',
+        price: 40,
+        isPerSqFt: true,
+        originalPrice: 55,
+        visitCharge: 399,
+        time: '1-3 Days',
+        badge: '₹40 / SQ. FT. • DUST FREE',
+        badgeColor: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30',
+        keywords: ['painting', '40 per sq ft', 'paint per sq ft 40 rupees', 'house painting near me', 'wall painting', 'asian paints', 'interior painting'],
+        image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
+        description: 'Complete indoor house wall painting labor at fixed rate of ₹40 per sq. ft. Includes electric dust-free sanding machine operation, full furniture masking cover, double coat roller application, and post-painting room cleanup.',
+        highlights: ['Fixed standard rate: ₹40 / sq. ft.', 'Laser surface measurement & instant quote', 'Dust-free electric sanding & masking', '1-Year paint adhesion guarantee'],
+        inclusions: ['Complete masking of floor & furniture', 'Putty touch-up & 2 coats roller painting labor', 'Post-service deep room cleanup'],
+        exclusions: ['Cost of paint cans, primer, putty bags, or masking tape (Saman charged extra as per actual brand selection)'],
+        reviews: [
+          { user: 'Ketan Trivedi (Morbi)', rating: 5, comment: 'Transparent pricing at ₹40 per sq ft! They covered all my furniture with plastic sheets.' },
+          { user: 'Kinjal Shah (Rajkot)', rating: 5, comment: 'Very clean dust-free sanding machine work. Paint finish is ultra smooth.' }
+        ]
+      },
+      {
+        id: 302,
+        categoryId: 'painting',
+        name: 'Wall Seepage Waterproofing & Anti-Dampness Chemical Treatment',
+        rating: 4.94,
+        reviewsCount: '42K',
+        price: 1999,
+        originalPrice: 2899,
+        visitCharge: 399,
+        time: '4-6 hrs',
+        badge: '3-YEAR DAMP PROOF',
+        badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+        keywords: ['waterproofing', 'wall dampness', 'seepage fix', 'dr fixit', 'wall waterproofing near me'],
+        image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80',
+        description: 'Permanent solution for peeling wall plaster, salt efflorescence (shora), and moisture seepage. Includes scraper scraping, Dr. Fixit/Asian Paints SmartCare damp-block chemical injection, and primer sealing labor.',
+        highlights: ['Deep moisture meter diagnosis included', '3-Year No-Seepage Warranty', 'Special anti-fungal barrier coat'],
+        inclusions: ['Moisture detection test', 'Plaster scraping & chemical barrier application labor', 'Waterproof putty smoothing'],
+        exclusions: ['Waterproof chemical materials, latex additives or sealer cans (Saman charged extra)'],
+        reviews: [
+          { user: 'Sanjay Jadeja', rating: 5, comment: 'Cured my bedroom wall dampness completely before monsoon!' }
+        ]
+      },
+      {
+        id: 303,
+        categoryId: 'painting',
+        name: 'Accent Wall Designer Texture & Stencil Art Painting',
+        rating: 4.98,
+        reviewsCount: '29K',
+        price: 1499,
+        originalPrice: 2299,
+        visitCharge: 399,
+        time: '3-4 hrs',
+        badge: 'ROYALE TEXTURE',
+        badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        keywords: ['texture paint', 'accent wall', 'stencil painting', 'designer wall painting'],
+        image: 'https://images.unsplash.com/photo-1562663474-6cbb3eaa4d14?auto=format&fit=crop&w=600&q=80',
+        description: 'Transform your living room or bed backdrop wall with premium metallic texture, metallic stencil art, geometric patterns, or Royale Play velvet finishes.',
+        highlights: ['30+ Metallic & Velvet catalog options', 'Handcrafted designer artist execution', 'Masking tape edge perfection'],
+        inclusions: ['Base coat preparation & texture application labor', 'Metallic highlights polishing'],
+        exclusions: ['Royale Play texture cans or stencil plastic sheets (Saman extra)'],
+        reviews: [
+          { user: 'Nisha Mehta', rating: 5, comment: 'The metallic velvet accent wall looks stunning in my drawing room!' }
+        ]
+      },
+
+      // --- ELECTRICIAN ---
+      {
+        id: 201,
+        categoryId: 'electrical',
+        name: 'Electrician Near Me (Switchboard, Socket & Wiring Fix)',
+        rating: 4.93,
+        reviewsCount: '92K',
+        price: 1192,
+        originalPrice: 1992,
+        visitCharge: 399,
+        time: '30 mins',
+        badge: 'LABOR ONLY • SAMAN EXTRA',
+        badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        keywords: ['electrician near me home service', 'electrician', 'switchboard repair', 'short circuit fix', 'wiring installation'],
+        image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80',
+        description: 'Expert electrician home service for switchboard fitting, socket replacement, fan setup, light wiring, and short circuit fault diagnosis. Mandatory ₹399 visiting charge included. Spare parts & materials (saman) are not included.',
+        highlights: ['Doorstep diagnosis & safety check included', 'Certified & background-verified electricians', '30-day service guarantee'],
+        inclusions: ['MCB inspection & connection fix', 'Switchboard and socket replacement labor', 'Doorstep visit & thermal load checking'],
+        exclusions: ['Cost of electrical spare parts or heavy copper wires (Saman not included)'],
+        reviews: [
+          { user: 'Harsh Shah', rating: 5, comment: 'Electrician arrived in 20 minutes! Fixed main breaker issue cleanly.' }
+        ]
+      },
+
+      // --- PLUMBER ---
+      {
+        id: 202,
+        categoryId: 'plumbing',
+        name: 'Plumber Near Me (Tap Leakage, Pipe Sealing & Fitting)',
+        rating: 4.91,
+        reviewsCount: '84K',
+        price: 1592,
+        originalPrice: 2392,
+        visitCharge: 399,
+        time: '30 mins',
+        badge: 'LABOR ONLY • SAMAN EXTRA',
+        badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        keywords: ['plumber near me home service', 'plumber', 'tap leak fix', 'drain unblock', 'toilet repair'],
+        image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80',
+        description: 'Professional plumber home service for tap leakage repair, blocked pipe flushing, washbasin fitting, flush tank repair, and bathroom fittings. Standard ₹399 visiting charge. Spare parts (saman) extra.',
+        highlights: ['Specialized plumbing pressure kit', 'Doorstep visit fee ₹399', '30-day warranty on repair work'],
+        inclusions: ['Tap cartridge & spindle replacement labor', 'Under-sink pipe leakage sealant work', 'Drain block removal labor'],
+        exclusions: ['New sanitaryware, taps, valves, hoses or pipe hardware (Saman not included)'],
+        reviews: [{ user: 'Aakash Dave', rating: 5, comment: 'Excellent plumber home service. Solved a persistent leak in 20 mins.' }]
+      },
+
+      // --- AC & APPLIANCES ---
+      {
+        id: 1,
+        categoryId: 'ac',
+        name: 'AC Power Jet Foam Wash & Complete Cooling Service',
+        rating: 4.88,
+        reviewsCount: '142K',
+        price: 1996,
+        originalPrice: 2796,
+        visitCharge: 399,
+        time: '45 mins',
+        badge: '2X COOLING PRO',
+        badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+        keywords: ['ac repair near me home service', 'ac service', 'air conditioner service'],
+        image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80',
+        description: 'Deep foam cleaning of indoor unit filter, cooling coil, condenser coil & power jet pressure washing. Includes ₹399 visit charge & gas pressure audit.',
+        highlights: ['2X deeper cleaning with active foam', 'Includes gas pressure check', '30 days unconditional warranty'],
+        inclusions: ['Indoor coil foam jet cleaning', 'Drain tray & pipe flushes', 'Outdoor unit jet spray'],
+        exclusions: ['Spare parts replacement cost (Saman not included)', 'Gas refilling if empty'],
+        reviews: [{ user: 'Aakash M.', rating: 5, comment: 'AC cooling improved significantly!' }]
+      },
+      {
+        id: 203,
+        categoryId: 'ac',
+        name: 'Washing Machine Repair Near Me (Front, Top Load & Semi)',
+        rating: 4.89,
+        reviewsCount: '65K',
+        price: 1196,
+        originalPrice: 1996,
+        visitCharge: 399,
+        time: '45 mins',
+        badge: 'LABOR ONLY • SAMAN EXTRA',
+        badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        keywords: ['washing machine repair near me home service', 'washing machine repair', 'front load repair'],
+        image: 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?auto=format&fit=crop&w=600&q=80',
+        description: 'Doorstep washing machine repair home service for front load, top load, and semi-automatic machines (IFB, LG, Samsung, Whirlpool, Bosch). Mandatory ₹399 visit charge. Spare parts (saman) billed extra.',
+        highlights: ['Genuine original spare replacement options', 'Motor & drum balance check', 'Multi-brand certified technicians'],
+        inclusions: ['Full diagnostic scan & labor', 'Water intake/drainage pump inspection'],
+        exclusions: ['Major PCB board, motor, belt or valve replacement cost (Saman not included)'],
+        reviews: [{ user: 'Priya Joshi', rating: 5, comment: 'Fixed the drain pump on spot!' }]
+      },
+
+      // --- SOFA & DEEP CLEANING ---
+      {
+        id: 204,
+        categoryId: 'sofa_cleaning',
+        name: 'Sofa Repair Near Me Home Service (Re-Upholstery & Foam Fix)',
+        rating: 4.87,
+        reviewsCount: '41K',
+        price: 998,
+        originalPrice: 1598,
+        visitCharge: 399,
+        time: '60 mins',
+        badge: 'LABOR ONLY • SAMAN EXTRA',
+        badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        keywords: ['sofa repair near me home service', 'sofa repair', 'sofa foam change'],
+        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80',
+        description: 'On-demand sofa repair home service including cushion sagging repair labor, wooden frame reinforcement, fabric re-upholstery labor, and springs adjustment.',
+        highlights: ['Doorstep inspection & material selection', 'High-density foam options available'],
+        inclusions: ['Sofa frame structural tightening labor', 'Cushion foam padding alignment labor'],
+        exclusions: ['Cost of new fabric / leather roll or new foam sheets (Saman not included)'],
+        reviews: [{ user: 'Rakesh Verma', rating: 5, comment: 'Old sagging sofa reconstructed like brand new!' }]
+      },
+
+      // --- CAR WASH ---
+      {
+        id: 207,
+        categoryId: 'car_wash',
+        name: 'Car Wash Home Service (Doorstep Pressure Foam & Polishing)',
+        rating: 4.94,
+        reviewsCount: '78K',
+        price: 399,
+        originalPrice: 699,
+        visitCharge: 399,
+        time: '45 mins',
+        badge: 'ALL INCLUSIVE WASH',
+        badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+        keywords: ['car wash home service', 'car wash near me', 'doorstep car wash'],
+        image: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&w=600&q=80',
+        description: 'Premium car wash home service using high-pressure jet, snow foam shampoo, vacuum interior cleaning, and dashboard wax polishing.',
+        highlights: ['Professional mobile pressure wash unit', 'pH neutral Meguiar foam shampoo'],
+        inclusions: ['Exterior high pressure water spray', 'Snow foam shampoo scrub', 'Interior vacuum cleaning'],
+        exclusions: ['Major exterior paint body repairs'],
+        reviews: [{ user: 'Chintan Patel', rating: 5, comment: 'Super convenient car wash home service!' }]
+      },
+
+      // --- PEST CONTROL ---
+      {
+        id: 101,
+        categoryId: 'pest_control',
+        name: 'Advanced Cockroach & Ant Control (2 Sessions)',
+        rating: 4.91,
+        reviewsCount: '86K',
+        price: 1798,
+        originalPrice: 2598,
+        visitCharge: 399,
+        time: '45 mins',
+        badge: 'GELS INCLUDED',
+        badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+        keywords: ['pest control', 'cockroach control'],
+        image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?auto=format&fit=crop&w=600&q=80',
+        description: 'Bayer eco-gel technology & odorless spray applied in kitchen cabinets, drain pipes, and wall gaps. Includes 60 days warranty.',
+        highlights: ['100% Odorless & Non-Toxic Gel', 'Includes 2nd session after 15 days'],
+        inclusions: ['Kitchen cabinet gel dots application', 'Sink & bathroom drain chemical flushing'],
+        exclusions: ['Structural woodwork damage repair'],
+        reviews: [{ user: 'Karan M.', rating: 5, comment: 'Not a single cockroach seen after 3 days.' }]
+      }
+    ];
+
+    const WALL_COLORS = [
+      { name: 'Teal Elegance', hex: '#0f766e', textClass: 'text-teal-400' },
+      { name: 'Royal Velvet', hex: '#6b21a8', textClass: 'text-purple-400' },
+      { name: 'Warm Ivory', hex: '#fef3c7', textClass: 'text-amber-200' },
+      { name: 'Ocean Mist', hex: '#0284c7', textClass: 'text-sky-400' },
+      { name: 'Sage Green', hex: '#15803d', textClass: 'text-emerald-400' },
+      { name: 'Slate Charcoal', hex: '#334155', textClass: 'text-slate-300' }
+    ];
+
+    const ROOM_TYPES = [
+      { id: 'living', name: 'Living Room', icon: '🛋️' },
+      { id: 'bedroom', name: 'Master Bedroom', icon: '🛏️' },
+      { id: 'dining', name: 'Dining Room', icon: '🍽️' }
+    ];
+
+    function SevenSHomeServiceApp() {
+      // Navigation State
+      const [activeTab, setActiveTab] = useState('customer'); // 'customer', 'ai_lab', 'painting_studio', 'rate_card', 'bookings', 'partner'
+      const [selectedCategory, setSelectedCategory] = useState('all');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [sortBy, setSortBy] = useState('popular');
+      const [filterRatingOnly, setFilterRatingOnly] = useState(false);
+      const [isUcPlus, setIsUcPlus] = useState(false);
+      const [wishlist, setWishlist] = useState([301, 201, 207]);
+
+      // City Location
+      const [selectedCity, setSelectedCity] = useState('Morbi');
+      const [addressLine, setAddressLine] = useState('102, Green City, Main Road');
+      const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+
+      // Cart & Modals
+      const [cart, setCart] = useState([]);
+      const [isCartOpen, setIsCartOpen] = useState(false);
+      const [selectedServiceDetail, setSelectedServiceDetail] = useState(null);
+
+      // Interactive Painting Studio State
+      const [paintingSqFt, setPaintingSqFt] = useState(800);
+      const [paintingConfig, setPaintingConfig] = useState('2 BHK Flat (Approx 800 Sq. Ft.)');
+      const [paintingFinish, setPaintingFinish] = useState('Asian Paints Royale Luxury (Smooth Finish)');
+      const [needsWaterproofing, setNeedsWaterproofing] = useState(true);
+      const [previewWallColor, setPreviewWallColor] = useState('#0f766e');
+      const [previewRoomType, setPreviewRoomType] = useState('living');
+
+      // Checkout & Coupons
+      const [promoCode, setPromoCode] = useState('');
+      const [appliedDiscount, setAppliedDiscount] = useState(0);
+      const [couponError, setCouponError] = useState('');
+      const [selectedDate, setSelectedDate] = useState('Today');
+      const [selectedSlot, setSelectedSlot] = useState('02:00 PM - 03:00 PM');
+      const [paymentMethod, setPaymentMethod] = useState('pay_after'); // 'pay_after', 'upi', 'card'
+
+      // AI Gemini Assistant
+      const [aiPrompt, setAiPrompt] = useState('');
+      const [aiLoading, setAiLoading] = useState(false);
+      const [aiDiagnosisResult, setAiDiagnosisResult] = useState('');
+
+      // Toast Notification
+      const [toastMessage, setToastMessage] = useState('');
+
+      // Bookings & Partner State
+      const [bookings, setBookings] = useState([
+        {
+          id: 'UC-91204',
+          items: [{ id: 301, name: 'Full Home Express Wall Painting (800 sq ft @ ₹40/sq ft)', price: 32000, quantity: 1 }],
+          totalAmount: 32399,
+          address: '102, Green City, Main Road, Morbi',
+          slot: 'Tomorrow, 10:00 AM',
+          status: 'Assigned',
+          otp: '4821',
+          partner: { name: 'Ramesh Painter (Master Decorator)', phone: `+91 ${CONTACT_PHONE}`, rating: '4.98 ★', jobsDone: 840 },
+          createdAt: new Date().toISOString()
+        }
+      ]);
+
+      const [partnerJobs, setPartnerJobs] = useState([
+        {
+          id: 'UC-91204',
+          customer: 'Priya Sharma',
+          service: 'Full Home Wall Painting (800 sq ft @ ₹40/sq.ft)',
+          address: '102, Green City, Main Road, Morbi',
+          slot: 'Tomorrow, 10:00 AM',
+          payout: 27200,
+          status: 'Assigned',
+          otpInput: ''
+        }
+      ]);
+
+      const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(''), 3500);
+      };
+
+      const handleAiDiagnosis = async (customText = null) => {
+        const queryText = (customText || aiPrompt).trim();
+        if (!queryText) return;
+
+        setAiLoading(true);
+        setAiDiagnosisResult('');
+
+        const systemPrompt = "You are 7S Smart AI Diagnostic Assistant for Home Services (Wall Painting @ ₹40/sq.ft, Waterproofing, Seepage, Electrician, Plumber, AC Repair, Washing Machine, Sofa, Car Wash, Pest Control). Analyze the user's issue in 3 clear points: 1) Technical Root Cause, 2) Recommended Service to Book, 3) Transparency Note mentioning house wall painting labor is ₹40 per sq ft, and paint cans/materials/saman are billed on actuals as per standard MRP. Keep tone polite and professional.";
+        
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `User reported issue: ${queryText}` }] }],
+              systemInstruction: { parts: [{ text: systemPrompt }] }
+            })
+          });
+
+          const data = await response.json();
+          const textResult = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          if (textResult) {
+            setAiDiagnosisResult(textResult);
+          } else {
+            throw new Error("Invalid response");
+          }
+        } catch (err) {
+          const fallback = `🎨 **AI Diagnosis Summary for "${queryText}":**\n\n1. **Technical Diagnosis:** Wall dampness / flaking is caused by moisture entrapment or aging interior paint binder.\n2. **Recommended Action:** Book our **Full Home Painting & Seepage Waterproofing Service** (Standard rate: ₹40 / sq. ft.).\n3. **Pricing Transparency:** Doorstep surface inspection & roller labor is calculated at ₹40/sq.ft. Paint cans & putty (Saman) billed on actual MRP.`;
+          setAiDiagnosisResult(fallback);
+        } finally {
+          setAiLoading(false);
+        }
+      };
+
+      const toggleWishlist = (id, e) => {
+        if (e) e.stopPropagation();
+        setWishlist(prev =>
+          prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+        showToast(wishlist.includes(id) ? 'Removed from saved' : 'Added to favorites ❤️');
+      };
+
+      const addToCart = (service, customName = null, customPrice = null) => {
+        const finalPrice = customPrice !== null ? customPrice : (service.isPerSqFt ? service.price * 500 : service.price);
+        const finalName = customName || (service.isPerSqFt ? `${service.name} (500 sq ft package)` : service.name);
+
+        setCart((prev) => {
+          const existing = prev.find((item) => item.name === finalName);
+          if (existing) {
+            return prev.map((item) =>
+              item.name === finalName ? { ...item, quantity: item.quantity + 1 } : item
+            );
+          }
+          return [...prev, { ...service, name: finalName, price: finalPrice, quantity: 1 }];
+        });
+        showToast(`Added "${finalName}" to cart (₹${finalPrice})`);
+      };
+
+      const updateQuantity = (serviceId, delta, serviceName = null) => {
+        setCart((prev) =>
+          prev
+            .map((item) => {
+              if (item.name === serviceName || item.id === serviceId) {
+                const newQty = item.quantity + delta;
+                return newQty > 0 ? { ...item, quantity: newQty } : null;
+              }
+              return item;
+            })
+            .filter(Boolean)
+        );
+      };
+
+      // Pricing Calculation
+      const rawSubtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const ucPlusDiscount = isUcPlus ? Math.round(rawSubtotal * 0.10) : 0;
+      const cartSubtotal = rawSubtotal - ucPlusDiscount;
+
+      const handleApplyCoupon = (codeToApply) => {
+        const code = (codeToApply || promoCode).trim().toUpperCase();
+        setCouponError('');
+        if (code === 'PAINT15') {
+          setAppliedDiscount(Math.round(cartSubtotal * 0.15));
+          setPromoCode('PAINT15');
+          showToast('🎨 Coupon PAINT15 applied! 15% OFF Painting');
+        } else if (code === 'PEST20') {
+          setAppliedDiscount(Math.round(cartSubtotal * 0.20));
+          setPromoCode('PEST20');
+          showToast('🦟 Coupon PEST20 applied! 20% OFF');
+        } else if (code === 'UCFIRST') {
+          setAppliedDiscount(Math.round(cartSubtotal * 0.15));
+          setPromoCode('UCFIRST');
+          showToast('🎉 Coupon UCFIRST applied! 15% OFF');
+        } else if (code === 'CLEAN100') {
+          if (cartSubtotal < 1000) { setCouponError('Min order ₹1,000 required'); return; }
+          setAppliedDiscount(100);
+          setPromoCode('CLEAN100');
+          showToast('✨ Coupon CLEAN100 applied! ₹100 Flat OFF');
+        } else {
+          setCouponError('Invalid code. Try "PAINT15", "PEST20", or "UCFIRST"');
+        }
+      };
+
+      const taxes = cartSubtotal > 0 ? Math.round((cartSubtotal - appliedDiscount) * 0.05) : 0;
+      const grandTotal = Math.max(0, cartSubtotal - appliedDiscount + taxes);
+
+      const handleCheckout = (e) => {
+        e.preventDefault();
+        if (cart.length === 0) return;
+
+        const fullAddress = `${addressLine}, ${selectedCity}`;
+        const newBooking = {
+          id: 'UC-' + Math.floor(10000 + Math.random() * 90000),
+          items: [...cart],
+          totalAmount: grandTotal,
+          address: fullAddress,
+          slot: `${selectedDate}, ${selectedSlot}`,
+          status: 'Assigned',
+          otp: Math.floor(1000 + Math.random() * 9000).toString(),
+          paymentMethod: paymentMethod === 'pay_after' ? 'Pay After Service' : paymentMethod === 'upi' ? 'UPI / QR Code' : 'Credit / Debit Card',
+          partner: {
+            name: 'Kishan Patel (7S Verified Senior Pro)',
+            phone: `+91 ${CONTACT_PHONE}`,
+            rating: '4.96 ★',
+            jobsDone: 1120
+          },
+          createdAt: new Date().toISOString()
+        };
+
+        setBookings([newBooking, ...bookings]);
+        setPartnerJobs(prev => [{
+          id: newBooking.id,
+          customer: 'You (Customer)',
+          service: cart.map(i => i.name).join(', '),
+          address: fullAddress,
+          slot: `${selectedDate}, ${selectedSlot}`,
+          payout: Math.round(grandTotal * 0.85),
+          status: 'Assigned',
+          otpInput: ''
+        }, ...prev]);
+
+        setCart([]);
+        setIsCartOpen(false);
+        setActiveTab('bookings');
+        showToast('🎉 Service Scheduled! Professional Assigned.');
+      };
+
+      // Calculated Painting Cost Estimate
+      const estimatedPaintingPrice = useMemo(() => {
+        const sqFt = Math.max(50, Number(paintingSqFt) || 0);
+        let baseCost = sqFt * 40; // ₹40 per sq ft
+
+        if (needsWaterproofing) {
+          baseCost += Math.round(sqFt * 12); // waterproofing add-on @ ₹12/sq ft
+        }
+
+        return baseCost;
+      }, [paintingSqFt, needsWaterproofing]);
+
+      const handleConfigChange = (cfg) => {
+        setPaintingConfig(cfg);
+        if (cfg.includes('1 BHK')) setPaintingSqFt(500);
+        else if (cfg.includes('2 BHK')) setPaintingSqFt(800);
+        else if (cfg.includes('3 BHK')) setPaintingSqFt(1200);
+        else if (cfg.includes('Single Accent')) setPaintingSqFt(150);
+      };
+
+      const filteredServices = useMemo(() => {
+        return INITIAL_SERVICES.filter((service) => {
+          const matchesCategory = selectedCategory === 'all' || service.categoryId === selectedCategory;
+          const q = searchQuery.toLowerCase().trim();
+          
+          const matchesSearch = !q || 
+            service.name.toLowerCase().includes(q) ||
+            service.description.toLowerCase().includes(q) ||
+            (service.keywords && service.keywords.some(k => k.toLowerCase().includes(q)));
+
+          const matchesRating = !filterRatingOnly || service.rating >= 4.90;
+          return matchesCategory && matchesSearch && matchesRating;
+        }).sort((a, b) => {
+          if (sortBy === 'rating') return b.rating - a.rating;
+          if (sortBy === 'price_low') return a.price - b.price;
+          if (sortBy === 'price_high') return b.price - a.price;
+          return b.reviewsCount.localeCompare(a.reviewsCount);
+        });
+      }, [selectedCategory, searchQuery, filterRatingOnly, sortBy]);
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-28">
+          
+          {/* TOP NAVBAR */}
+          <header className="sticky top-0 z-40 glass-panel border-b border-slate-800/80 px-4 py-3 shadow-2xl">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+              
+              {/* Brand Logo & Location */}
+              <div className="flex items-center gap-3">
+                <div 
+                  onClick={() => setActiveTab('customer')}
+                  className="flex items-center gap-2 cursor-pointer group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-fuchsia-500 to-amber-400 p-[2px] shadow-lg shadow-fuchsia-500/20 group-hover:scale-105 transition-transform">
+                    <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-extrabold text-xl text-fuchsia-400">
+                      7S
+                    </div>
+                  </div>
+                  <div className="hidden sm:block">
+                    <h1 className="font-extrabold text-lg tracking-tight flex items-center gap-1.5 leading-none">
+                      7S <span className="gradient-text">Home Service</span>
+                    </h1>
+                    <p className="text-[10px] text-slate-400 font-medium tracking-wide">PAINTING (₹40/SQ.FT) • REPAIR & CLEANING</p>
+                  </div>
+                </div>
+
+                {/* City Picker Button */}
+                <button
+                  onClick={() => setIsLocationModalOpen(true)}
+                  className="flex items-center gap-1.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 rounded-xl px-3 py-1.5 text-xs font-medium transition-colors"
+                >
+                  <MapPinIcon className="w-4 h-4 text-brand-400" />
+                  <span className="max-w-[100px] truncate">{selectedCity}</span>
+                  <span className="text-slate-500">▼</span>
+                </button>
+              </div>
+
+              {/* Top Navigation Tabs */}
+              <nav className="hidden lg:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+                <button
+                  onClick={() => { setActiveTab('customer'); setSelectedCategory('all'); }}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === 'customer' ? 'bg-fuchsia-600 text-white shadow-md shadow-fuchsia-500/20' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  🛠️ All Services
+                </button>
+                <button
+                  onClick={() => setActiveTab('painting_studio')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'painting_studio' ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-bold shadow-md shadow-fuchsia-500/20' : 'text-fuchsia-300 hover:text-fuchsia-200'}`}
+                >
+                  <PaintRollerIcon className="w-3.5 h-3.5" /> Painting Studio (₹40/sq.ft)
+                </button>
+                <button
+                  onClick={() => setActiveTab('ai_lab')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'ai_lab' ? 'bg-brand-500 text-slate-950 shadow-md shadow-brand-500/20 font-bold' : 'text-amber-300 hover:text-amber-200'}`}
+                >
+                  <SparklesIcon className="w-3.5 h-3.5" /> AI Diagnostic
+                </button>
+                <button
+                  onClick={() => setActiveTab('rate_card')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === 'rate_card' ? 'bg-fuchsia-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  📊 Rate Sheet
+                </button>
+                <button
+                  onClick={() => setActiveTab('bookings')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all relative ${activeTab === 'bookings' ? 'bg-fuchsia-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  📦 My Bookings
+                  {bookings.length > 0 && (
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] bg-cyan-400 text-slate-950 font-bold">
+                      {bookings.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab('partner')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === 'partner' ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  👷 Partner
+                </button>
+              </nav>
+
+              {/* Right Action Icons */}
+              <div className="flex items-center gap-2">
+                
+                {/* 7S Plus Toggle */}
+                <button
+                  onClick={() => {
+                    setIsUcPlus(!isUcPlus);
+                    showToast(isUcPlus ? '7S Plus plan deactivated' : '✨ 7S Plus Activated! 10% OFF Services');
+                  }}
+                  className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                    isUcPlus 
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20 animate-pulse-slow' 
+                      : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
+                  }`}
+                >
+                  <SparklesIcon className={`w-3.5 h-3.5 ${isUcPlus ? 'text-slate-950' : 'text-amber-400'}`} />
+                  {isUcPlus ? 'PLUS ACTIVE (10% OFF)' : '7S PLUS'}
+                </button>
+
+                {/* Cart Drawer Trigger */}
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative bg-gradient-to-r from-fuchsia-600 via-purple-600 to-brand-500 hover:opacity-95 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-fuchsia-500/25 transition-transform active:scale-95"
+                >
+                  <ShoppingBagIcon className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cart</span>
+                  {cart.length > 0 && (
+                    <span className="bg-slate-950 text-fuchsia-300 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold border border-fuchsia-500/30">
+                      {cart.reduce((a, b) => a + b.quantity, 0)}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+            </div>
+          </header>
+
+          {/* MAIN CONTENT AREA */}
+          <main className="max-w-7xl mx-auto px-4 pt-6 flex-grow w-full">
+
+            {/* CUSTOMER HOME TAB */}
+            {activeTab === 'customer' && (
+              <div>
+                {/* HERO BANNER SECTION */}
+                <div className="relative rounded-3xl overflow-hidden glass-panel border border-slate-800 p-6 md:p-10 mb-8 shadow-2xl bg-gradient-to-r from-slate-900 via-slate-950 to-fuchsia-950/40">
+                  <div className="relative z-10 max-w-2xl">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-semibold mb-4">
+                      <PaintRollerIcon className="w-4 h-4" />
+                      House Painting at Fixed Rate: ₹40 / Sq. Ft. • Morbi, Gandhidham & Rajkot
+                    </div>
+                    
+                    <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-3">
+                      House Painting at <span className="gradient-text font-mono">₹40 / Sq. Ft.</span> <br />
+                      Transparent & Dust-Free.
+                    </h2>
+                    
+                    <p className="text-slate-300 text-sm md:text-base mb-6 font-normal">
+                      Express Wall Painting, Waterproofing, Electricians, Plumbers, AC Repair & Car Wash.
+                      <span className="text-amber-300 font-semibold ml-1">Wall painting fixed at ₹40/sq.ft labor. Paint materials (Saman) billed extra on actual MRP.</span>
+                    </p>
+
+                    {/* HERO SEARCH BAR */}
+                    <div className="relative max-w-xl">
+                      <div className="relative flex items-center">
+                        <SearchIcon className="absolute left-4 text-slate-400 w-5 h-5 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search 'paint 40 rs per sq ft', 'seepage', 'electrician', 'ac repair'..."
+                          className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/20 rounded-2xl pl-12 pr-10 py-3.5 text-sm text-slate-100 placeholder-slate-400 outline-none shadow-xl transition-all"
+                        />
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-4 text-slate-400 hover:text-slate-200 text-xs font-bold"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+
+                      {/* QUICK SEARCH KEYWORD PILLS */}
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {QUICK_SEARCH_CHIPS.map((chip, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSearchQuery(chip)}
+                            className="text-[11px] bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-fuchsia-300 px-2.5 py-1 rounded-lg border border-slate-800 transition-colors"
+                          >
+                            + {chip}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PROMO TICKER CAROUSEL */}
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-3">
+                    {PROMO_OFFERS.map((offer, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleApplyCoupon(offer.code)}
+                        className="glass-card rounded-2xl p-3.5 flex items-center justify-between cursor-pointer group hover:border-fuchsia-500/50"
+                      >
+                        <div>
+                          <div className="text-xs font-bold text-fuchsia-300 flex items-center gap-1.5">
+                            🏷️ {offer.label}
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5">{offer.desc}</div>
+                        </div>
+                        <span className="text-[10px] bg-fuchsia-500/10 text-fuchsia-300 px-2 py-1 rounded-md font-mono font-bold group-hover:bg-fuchsia-500 group-hover:text-slate-950 transition-colors">
+                          {offer.code}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CATEGORIES SCROLLER */}
+                <div className="mb-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <span>Explore Service Categories</span>
+                    </h3>
+                    
+                    <button
+                      onClick={() => setActiveTab('painting_studio')}
+                      className="text-xs text-fuchsia-300 hover:text-fuchsia-200 font-semibold flex items-center gap-1.5 bg-fuchsia-500/10 px-3 py-1.5 rounded-xl border border-fuchsia-500/30"
+                    >
+                      <PaintRollerIcon className="w-4 h-4" /> ₹40/Sq.Ft Painting Studio
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+                    {CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all border shrink-0 ${
+                          selectedCategory === cat.id
+                            ? 'bg-gradient-to-r from-fuchsia-600 via-purple-600 to-brand-500 text-white border-fuchsia-400 shadow-lg shadow-fuchsia-500/20 font-bold scale-105'
+                            : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:bg-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <span className="text-base">{cat.icon}</span>
+                        <span>{cat.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FILTER & SORT BAR */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                  <div className="text-sm font-semibold text-slate-300">
+                    Showing <span className="text-fuchsia-400 font-bold">{filteredServices.length}</span> verified services in <span className="text-amber-300 font-bold">{selectedCity}</span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => setFilterRatingOnly(!filterRatingOnly)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                        filterRatingOnly 
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' 
+                          : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
+                      }`}
+                    >
+                      <StarIcon className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      <span>Top Rated (4.9★+)</span>
+                    </button>
+
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="bg-slate-800 text-slate-200 text-xs font-medium border border-slate-700 rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+                    >
+                      <option value="popular">Most Popular</option>
+                      <option value="rating">Highest Rated</option>
+                      <option value="price_low">Price: Low to High</option>
+                      <option value="price_high">Price: High to Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* SERVICES GRID */}
+                {filteredServices.length === 0 ? (
+                  <div className="glass-panel rounded-3xl p-12 text-center my-8">
+                    <div className="text-4xl mb-3">🔍</div>
+                    <h4 className="text-lg font-bold text-slate-200">No services match your query</h4>
+                    <p className="text-sm text-slate-400 mt-1 mb-4">Try searching for 'paint 40 rs per sq ft', 'seepage', 'electrician', or 'car wash'</p>
+                    <button
+                      onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setFilterRatingOnly(false); }}
+                      className="bg-brand-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs hover:bg-brand-400"
+                    >
+                      Reset All Filters
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    {filteredServices.map((service) => (
+                      <div
+                        key={service.id}
+                        className="glass-card rounded-3xl overflow-hidden flex flex-col justify-between group"
+                      >
+                        <div>
+                          {/* Image & Top Badges */}
+                          <div className="relative h-48 overflow-hidden bg-slate-950">
+                            <img
+                              src={service.image}
+                              alt={service.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                              onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80"; }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/30" />
+
+                            {/* Badge */}
+                            <div className="absolute top-3 left-3">
+                              <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider backdrop-blur-md ${service.badgeColor}`}>
+                                {service.badge}
+                              </span>
+                            </div>
+
+                            {/* Wishlist Button */}
+                            <button
+                              onClick={(e) => toggleWishlist(service.id, e)}
+                              className="absolute top-3 right-3 p-2 rounded-full bg-slate-950/60 backdrop-blur-md hover:bg-slate-900 transition-colors"
+                            >
+                              <HeartIcon filled={wishlist.includes(service.id)} />
+                            </button>
+
+                            {/* Visit Charge Tag */}
+                            <div className="absolute bottom-3 left-3 bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-xl px-2.5 py-1 text-[11px] text-slate-300 font-medium">
+                              ⏱️ {service.time} • ₹{service.visitCharge} Visit Fee
+                            </div>
+                          </div>
+
+                          {/* Details Body */}
+                          <div className="p-5">
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-1 text-xs font-bold text-amber-400">
+                                <StarIcon className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                <span>{service.rating}</span>
+                                <span className="text-slate-400 font-normal">({service.reviewsCount})</span>
+                              </div>
+                              <span className="text-[11px] text-brand-400 font-semibold bg-brand-500/10 px-2 py-0.5 rounded-md">
+                                Verified Pro
+                              </span>
+                            </div>
+
+                            <h4 className="font-bold text-base text-slate-100 line-clamp-2 mb-2 group-hover:text-fuchsia-300 transition-colors">
+                              {service.name}
+                            </h4>
+
+                            <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
+                              {service.description}
+                            </p>
+
+                            {/* Highlights */}
+                            <div className="space-y-1.5 mb-4">
+                              {service.highlights.slice(0, 2).map((h, i) => (
+                                <div key={i} className="flex items-center gap-2 text-[11px] text-slate-300">
+                                  <CheckCircleIcon className="w-3.5 h-3.5 text-brand-400 shrink-0" />
+                                  <span className="truncate">{h}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card Footer Price & Add Button */}
+                        <div className="p-5 pt-0 border-t border-slate-800/60 mt-auto flex items-center justify-between">
+                          <div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xl font-extrabold text-slate-100">
+                                ₹{service.price} {service.isPerSqFt ? '/ sq.ft' : ''}
+                              </span>
+                              <span className="text-xs text-slate-500 line-through">
+                                ₹{service.originalPrice} {service.isPerSqFt ? '/ sq.ft' : ''}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-amber-300/80 font-medium">
+                              {service.isPerSqFt ? 'Fixed Rate ₹40/sq ft • Saman Extra' : service.badge.includes('LABOR') ? 'Labor Fee • Saman Extra' : 'Inclusive Price'}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                if (service.isPerSqFt) {
+                                  setActiveTab('painting_studio');
+                                } else {
+                                  setSelectedServiceDetail(service);
+                                }
+                              }}
+                              className="px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700"
+                            >
+                              {service.isPerSqFt ? 'Studio' : 'Details'}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                if (service.isPerSqFt) {
+                                  setActiveTab('painting_studio');
+                                } else {
+                                  addToCart(service);
+                                }
+                              }}
+                              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white hover:opacity-90 active:scale-95 transition-all shadow-md shadow-fuchsia-500/20"
+                            >
+                              + Add
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PAINTING STUDIO & INTERACTIVE VISUALIZER TAB */}
+            {activeTab === 'painting_studio' && (
+              <div className="max-w-5xl mx-auto space-y-8">
+                
+                {/* Header */}
+                <div className="glass-panel rounded-3xl p-6 md:p-8 border border-fuchsia-500/30 bg-gradient-to-r from-slate-900 via-slate-950 to-fuchsia-950/50 shadow-2xl">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-bold mb-2">
+                        <PaintRollerIcon className="w-4 h-4" /> Fixed Rate: ₹40 / Sq. Ft. Paint Labor
+                      </div>
+                      <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+                        Interactive Paint Studio & Wall Visualizer
+                      </h2>
+                      <p className="text-xs md:text-sm text-slate-300 mt-1">
+                        Select room colors, texture finishes, surface area, and calculate exact labor cost at ₹40/sq.ft!
+                      </p>
+                    </div>
+
+                    <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl font-mono text-right">
+                      <div className="text-[10px] text-slate-400 uppercase font-bold">Standard Labor Rate</div>
+                      <div className="text-2xl font-extrabold text-fuchsia-300">₹40 <span className="text-xs text-slate-400 font-sans">/ sq. ft.</span></div>
+                    </div>
+                  </div>
+
+                  {/* VIRTUAL ROOM WALL PREVIEW CANVAS */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    {/* Visualizer Canvas Display */}
+                    <div className="lg:col-span-2 relative rounded-3xl h-72 md:h-80 border-2 border-slate-700/80 p-6 flex flex-col justify-between shadow-2xl transition-all duration-500 overflow-hidden" style={{ backgroundColor: previewWallColor }}>
+                      
+                      {/* Room Shadow Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent pointer-events-none" />
+                      
+                      <div className="relative z-10 flex items-center justify-between">
+                        <span className="text-xs font-bold bg-slate-950/80 backdrop-blur-md text-fuchsia-300 px-3 py-1 rounded-xl border border-fuchsia-500/30">
+                          Room Preview: {ROOM_TYPES.find(r => r.id === previewRoomType)?.name}
+                        </span>
+
+                        <span className="text-xs font-mono font-bold bg-slate-950/80 backdrop-blur-md text-amber-300 px-3 py-1 rounded-xl">
+                          Hex: {previewWallColor}
+                        </span>
+                      </div>
+
+                      {/* Mock Room Furniture Graphics */}
+                      <div className="relative z-10 flex items-end justify-between border-b-4 border-slate-800/80 pb-2">
+                        <div className="bg-slate-900/90 border border-slate-700 p-3 rounded-2xl backdrop-blur-md max-w-[200px]">
+                          <div className="text-lg mb-1">{ROOM_TYPES.find(r => r.id === previewRoomType)?.icon}</div>
+                          <div className="text-[11px] font-bold text-slate-200">Sanding & Primer Included</div>
+                          <div className="text-[10px] text-slate-400">Dust-free electric sanding machine</div>
+                        </div>
+
+                        <div className="text-right bg-slate-950/90 p-3 rounded-2xl border border-slate-800 backdrop-blur-md">
+                          <div className="text-[10px] text-slate-400 uppercase font-bold">Estimated Labor</div>
+                          <div className="text-xl font-extrabold text-brand-400 font-mono">₹{estimatedPaintingPrice}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Studio Control Panel */}
+                    <div className="space-y-4 bg-slate-900/90 p-5 rounded-3xl border border-slate-800">
+                      <div>
+                        <label className="text-xs font-bold text-slate-300 uppercase block mb-2">1. Select Room Type</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {ROOM_TYPES.map(rt => (
+                            <button
+                              key={rt.id}
+                              onClick={() => setPreviewRoomType(rt.id)}
+                              className={`p-2 rounded-xl text-xs font-semibold border flex flex-col items-center gap-1 transition-all ${
+                                previewRoomType === rt.id ? 'bg-fuchsia-600 text-white border-fuchsia-400 font-bold scale-105' : 'bg-slate-950 text-slate-400 border-slate-800'
+                              }`}
+                            >
+                              <span>{rt.icon}</span>
+                              <span className="text-[10px] truncate">{rt.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-slate-300 uppercase block mb-2">2. Pick Wall Color Shade</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {WALL_COLORS.map((col, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setPreviewWallColor(col.hex)}
+                              className={`p-2 rounded-xl text-xs font-semibold border flex items-center gap-2 ${previewWallColor === col.hex ? 'border-fuchsia-400 bg-slate-800 scale-105' : 'border-slate-800 bg-slate-950'}`}
+                            >
+                              <span className="w-4 h-4 rounded-full border border-slate-600" style={{ backgroundColor: col.hex }} />
+                              <span className="text-[10px] text-slate-300 truncate">{col.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* CALCULATOR FORM & ESTIMATE BREAKDOWN */}
+                <div className="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 space-y-6">
+                  <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                    <ToolIcon className="w-5 h-5 text-brand-400" />
+                    <span>Calculate House Painting Quote (Standard Rate: ₹40 / Sq. Ft.)</span>
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    {/* Input Controls */}
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Select Property Layout</label>
+                        <select
+                          value={paintingConfig}
+                          onChange={(e) => handleConfigChange(e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-200 outline-none focus:border-fuchsia-400"
+                        >
+                          <option value="1 BHK Flat (Approx 500 Sq. Ft.)">1 BHK Flat (Approx 500 Sq. Ft.)</option>
+                          <option value="2 BHK Flat (Approx 800 Sq. Ft.)">2 BHK Flat (Approx 800 Sq. Ft.)</option>
+                          <option value="3 BHK Flat (Approx 1200 Sq. Ft.)">3 BHK Flat (Approx 1200 Sq. Ft.)</option>
+                          <option value="Single Accent Feature Wall (150 Sq. Ft.)">Single Accent Feature Wall (150 Sq. Ft.)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-xs font-bold text-slate-300 uppercase">Custom Wall Area (Sq. Ft.)</label>
+                          <span className="text-xs font-mono font-bold text-fuchsia-300">Rate: ₹40 / sq ft</span>
+                        </div>
+                        <input
+                          type="number"
+                          min="50"
+                          max="10000"
+                          value={paintingSqFt}
+                          onChange={(e) => setPaintingSqFt(e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 focus:border-fuchsia-400 rounded-2xl p-3 text-sm font-mono font-bold text-slate-100 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Paint Finish & Brand Choice</label>
+                        <select
+                          value={paintingFinish}
+                          onChange={(e) => setPaintingFinish(e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-200 outline-none"
+                        >
+                          <option value="Asian Paints Royale Luxury (Smooth Finish)">Asian Paints Royale Luxury (Smooth Finish)</option>
+                          <option value="Asian Paints Tractor Emulsion (Matt)">Asian Paints Tractor Emulsion (Matt)</option>
+                          <option value="Nerolac Impression Velvet Finish">Nerolac Impression Velvet Finish</option>
+                        </select>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2">
+                        <input
+                          type="checkbox"
+                          id="waterproofCheckStudio"
+                          checked={needsWaterproofing}
+                          onChange={(e) => setNeedsWaterproofing(e.target.checked)}
+                          className="accent-fuchsia-500 w-4 h-4 rounded cursor-pointer"
+                        />
+                        <label htmlFor="waterproofCheckStudio" className="text-xs text-slate-300 font-medium cursor-pointer">
+                          Add Seepage Waterproofing Coat (+₹12 / sq. ft.)
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Summary Card */}
+                    <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-3xl flex flex-col justify-between space-y-4">
+                      <div>
+                        <div className="text-xs font-bold text-fuchsia-300 uppercase tracking-wider mb-2">Cost Summary Breakdown</div>
+                        
+                        <div className="space-y-2 text-xs text-slate-300 border-b border-slate-800 pb-4">
+                          <div className="flex justify-between">
+                            <span>Paint Execution Labor ({paintingSqFt} sq.ft @ ₹40/sq.ft)</span>
+                            <span className="font-mono font-bold">₹{paintingSqFt * 40}</span>
+                          </div>
+                          {needsWaterproofing && (
+                            <div className="flex justify-between text-cyan-300">
+                              <span>Waterproofing Coating ({paintingSqFt} sq.ft @ ₹12/sq.ft)</span>
+                              <span className="font-mono font-bold">₹{paintingSqFt * 12}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-slate-400">
+                            <span>Furniture Plastic Masking & Scraper Sanding</span>
+                            <span className="font-semibold text-brand-400">INCLUDED FREE</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200 leading-relaxed">
+                          📌 <strong>Saman Material Disclosure:</strong> Paint cans, primer buckets, and putty bags (Saman) are billed on actual MRP based on your brand choice.
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-baseline justify-between mb-3">
+                          <span className="text-xs text-slate-400">Total Labor Estimate</span>
+                          <span className="text-2xl font-extrabold font-mono text-fuchsia-300">₹{estimatedPaintingPrice}</span>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            addToCart({
+                              id: 998,
+                              name: `Wall Painting (${paintingSqFt} sq ft @ ₹40/sq ft) - ${paintingFinish}`,
+                              price: estimatedPaintingPrice,
+                              description: `Express wall painting labor for ${paintingSqFt} sq. ft. at ₹40/sq.ft fixed rate. Includes dust-free sanding & masking.`,
+                              badge: '₹40 / SQ FT FIXED',
+                              badgeColor: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30',
+                              time: '1-3 Days',
+                              visitCharge: 399,
+                              highlights: [`Rate: ₹40/sq.ft for ${paintingSqFt} sq.ft`, 'Dust-free electric sanding', 'Full furniture masking'],
+                              inclusions: ['Dust-free sanding', 'Double coat painting labor', 'Post cleanup'],
+                              exclusions: ['Paint cans cost (Saman extra)']
+                            }, `Wall Painting (${paintingSqFt} sq ft @ ₹40/sq ft)`, estimatedPaintingPrice);
+                          }}
+                          className="w-full bg-gradient-to-r from-fuchsia-600 via-purple-600 to-brand-500 text-white font-extrabold py-3.5 rounded-2xl text-xs hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-fuchsia-500/20"
+                        >
+                          Add Custom Package to Cart (₹{estimatedPaintingPrice})
+                        </button>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* AI DIAGNOSTIC TAB */}
+            {activeTab === 'ai_lab' && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-3 rounded-2xl bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300">
+                      <SparklesIcon className="w-6 h-6 animate-pulse" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-extrabold tracking-tight">7S AI Smart Home & Paint Diagnostic Assistant</h3>
+                      <p className="text-xs text-slate-400">Powered by Gemini 3 Flash • Wall Painting Rate ₹40/Sq.Ft</p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed mb-6">
+                    Describe any wall dampness, paint peeling, electrical tripping, or plumbing leak. Our AI analyzes the cause and suggests labor charges based on ₹40/sq.ft for wall painting.
+                  </p>
+
+                  {/* QUICK ISSUE PRESETS */}
+                  <div className="space-y-2 mb-6">
+                    <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Tap a quick issue to diagnose:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        "Calculate cost for painting 800 sq ft flat at ₹40 per sq ft rate",
+                        "Paint is peeling off bedroom wall due to moisture dampness",
+                        "AC running but not cooling the room",
+                        "Main MCB trips every time I switch on geyser",
+                        "Water leaking from under the kitchen washbasin"
+                      ].map((preset, i) => (
+                        <button
+                          key={i}
+                          onClick={() => { setAiPrompt(preset); handleAiDiagnosis(preset); }}
+                          className="text-xs bg-slate-900/90 hover:bg-fuchsia-500/20 text-slate-300 hover:text-fuchsia-300 px-3 py-1.5 rounded-xl border border-slate-800 transition-all text-left"
+                        >
+                          ⚡ {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* PROMPT INPUT */}
+                  <form onSubmit={(e) => { e.preventDefault(); handleAiDiagnosis(); }} className="relative mb-6">
+                    <textarea
+                      rows="3"
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      placeholder="Describe your wall condition or home issue (e.g. Need painting for 1000 sq ft at 40 rupees rate...)"
+                      className="w-full bg-slate-950/90 border border-slate-700/80 rounded-2xl p-4 text-xs text-slate-100 placeholder-slate-500 focus:border-fuchsia-400 outline-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={aiLoading || !aiPrompt.trim()}
+                      className="mt-3 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 via-purple-600 to-brand-500 text-white font-bold text-xs hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-fuchsia-500/20"
+                    >
+                      {aiLoading ? "Analyzing with Gemini AI..." : "Run AI Diagnosis"}
+                    </button>
+                  </form>
+
+                  {/* AI RESULT DISPLAY */}
+                  {aiDiagnosisResult && (
+                    <div className="p-5 rounded-2xl bg-slate-950/90 border border-fuchsia-500/30 text-xs leading-relaxed space-y-3">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <span className="font-extrabold text-fuchsia-300 flex items-center gap-1.5">
+                          ✨ AI Technical Diagnosis
+                        </span>
+                        <span className="text-[10px] text-slate-500">Gemini 3 Flash</span>
+                      </div>
+                      <div className="text-slate-200 whitespace-pre-wrap font-sans">
+                        {aiDiagnosisResult}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* RATE CARD MATRIX TAB */}
+            {activeTab === 'rate_card' && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 shadow-2xl">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-xl font-extrabold tracking-tight">Standard Saman & Labor Rate Index</h3>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Transparency First • House Painting Labor @ ₹40 / sq. ft. Paint cans & spare parts billed extra on actual MRP.
+                      </p>
+                    </div>
+                    <span className="bg-amber-500/10 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-xl text-xs font-bold">
+                      Fixed ₹40 / Sq. Ft Rate
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
+                          <th className="py-3 px-4">Category</th>
+                          <th className="py-3 px-4">Standard Service / Spare Part</th>
+                          <th className="py-3 px-4">Standard Rate / Price</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                        {STANDARD_SAMAN_RATE_CARD.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-900/60 transition-colors">
+                            <td className="py-3.5 px-4 font-bold text-fuchsia-300">{row.category}</td>
+                            <td className="py-3.5 px-4 font-medium text-slate-200">{row.item}</td>
+                            <td className="py-3.5 px-4 font-mono font-bold text-amber-300">{row.rate}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200 leading-relaxed">
+                    💡 <strong>Pro Tip:</strong> At ₹40 per sq ft, our team handles wall scraping, electric dust-free sanding, primer touchup, and double coat roller painting!
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MY BOOKINGS TAB */}
+            {activeTab === 'bookings' && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-extrabold">My Active & Past Bookings</h3>
+                  <span className="text-xs bg-slate-900 text-slate-400 px-3 py-1 rounded-xl border border-slate-800">
+                    {bookings.length} Requests
+                  </span>
+                </div>
+
+                {bookings.length === 0 ? (
+                  <div className="glass-panel rounded-3xl p-12 text-center">
+                    <div className="text-4xl mb-3">📦</div>
+                    <h4 className="text-lg font-bold">No active bookings yet</h4>
+                    <p className="text-xs text-slate-400 mt-1 mb-4">Book house painting @ ₹40/sq ft, electrician, plumber, or car wash.</p>
+                    <button
+                      onClick={() => setActiveTab('customer')}
+                      className="bg-fuchsia-600 text-white font-bold px-4 py-2 rounded-xl text-xs"
+                    >
+                      Browse Services
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {bookings.map((booking) => (
+                      <div key={booking.id} className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
+                          <div>
+                            <span className="text-xs font-mono font-bold text-fuchsia-300">{booking.id}</span>
+                            <div className="text-[11px] text-slate-400">Scheduled: {booking.slot}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                              Status: {booking.status}
+                            </span>
+                            <span className="px-3 py-1 rounded-full text-xs font-mono font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              OTP: {booking.otp}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Items */}
+                        <div className="space-y-2">
+                          {booking.items.map((item, i) => (
+                            <div key={i} className="flex justify-between text-xs text-slate-200">
+                              <span>{item.quantity}x {item.name}</span>
+                              <span className="font-mono font-bold">₹{item.price * item.quantity}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Address & Partner */}
+                        <div className="pt-2 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800">
+                          <div>
+                            <span className="text-slate-500 block font-semibold text-[10px] uppercase">Service Address & Payment</span>
+                            <span className="text-slate-300 block">{booking.address}</span>
+                            <span className="text-brand-400 font-semibold block mt-0.5">Mode: {booking.paymentMethod || 'Pay After Service'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 block font-semibold text-[10px] uppercase">Assigned Professional</span>
+                            <span className="text-fuchsia-300 font-bold">{booking.partner.name}</span>
+                            <span className="text-slate-400 block">{booking.partner.phone} • {booking.partner.rating}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-xs text-slate-400">Total Amount Payable</span>
+                          <span className="text-lg font-extrabold text-brand-400 font-mono">₹{booking.totalAmount}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PARTNER PORTAL TAB */}
+            {activeTab === 'partner' && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="glass-panel rounded-3xl p-6 border border-slate-800">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-100">👷 7S Service Partner Dashboard</h3>
+                      <p className="text-xs text-slate-400">Manage daily assigned orders and verify customer OTP</p>
+                    </div>
+                    <span className="bg-brand-500/20 text-brand-300 px-3 py-1 rounded-xl text-xs font-bold border border-brand-500/30">
+                      Partner Active
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 text-center mb-6">
+                    <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Today Payout</div>
+                      <div className="text-lg font-extrabold text-brand-400 font-mono">₹27,200</div>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Jobs Completed</div>
+                      <div className="text-lg font-extrabold text-cyan-400">5</div>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Rating</div>
+                      <div className="text-lg font-extrabold text-amber-400">4.98 ★</div>
+                    </div>
+                  </div>
+
+                  {/* Assigned Jobs */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Assigned Doorstep Jobs</h4>
+                    {partnerJobs.map((job, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="text-xs font-bold text-fuchsia-300">{job.service}</span>
+                            <div className="text-[11px] text-slate-400">{job.customer} • {job.slot}</div>
+                          </div>
+                          <span className="font-mono font-bold text-xs bg-emerald-500/10 text-emerald-300 px-2.5 py-1 rounded-lg">
+                            Payout ₹{job.payout}
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl">
+                          📍 {job.address}
+                        </div>
+
+                        {/* OTP Verification Input */}
+                        <div className="flex items-center gap-2 pt-1">
+                          <input
+                            type="text"
+                            maxLength="4"
+                            placeholder="Enter 4-digit Customer OTP"
+                            value={job.otpInput}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setPartnerJobs(prev => prev.map((j, i) => i === idx ? { ...j, otpInput: val } : j));
+                            }}
+                            className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-center font-mono tracking-widest text-brand-400 outline-none w-48"
+                          />
+                          <button
+                            onClick={() => {
+                              if (job.otpInput.length === 4) {
+                                setPartnerJobs(prev => prev.map((j, i) => i === idx ? { ...j, status: 'Completed' } : j));
+                                showToast('✅ Job Completed Verified! Payout Credited.');
+                              } else {
+                                showToast('Enter valid 4-digit OTP');
+                              }
+                            }}
+                            className="bg-brand-500 text-slate-950 text-xs font-bold px-4 py-1.5 rounded-xl hover:bg-brand-400"
+                          >
+                            Verify & Complete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* MOBILE BOTTOM NAVIGATION BAR */}
+          <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-panel border-t border-slate-800 px-2 py-2 flex items-center justify-around text-[10px]">
+            <button
+              onClick={() => { setActiveTab('customer'); setSelectedCategory('all'); }}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors ${activeTab === 'customer' ? 'text-fuchsia-400 font-bold' : 'text-slate-400'}`}
+            >
+              <span className="text-base">🛠️</span>
+              <span>Services</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('painting_studio')}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors ${activeTab === 'painting_studio' ? 'text-fuchsia-400 font-bold' : 'text-slate-400'}`}
+            >
+              <span className="text-base">🎨</span>
+              <span>Studio ₹40</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('ai_lab')}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors ${activeTab === 'ai_lab' ? 'text-amber-300 font-bold' : 'text-slate-400'}`}
+            >
+              <span className="text-base">✨</span>
+              <span>AI Diagnostics</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors relative ${activeTab === 'bookings' ? 'text-fuchsia-400 font-bold' : 'text-slate-400'}`}
+            >
+              <span className="text-base">📦</span>
+              <span>Bookings</span>
+              {bookings.length > 0 && (
+                <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              )}
+            </button>
+
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="flex flex-col items-center gap-1 py-1 px-2 rounded-xl text-brand-400 font-bold"
+            >
+              <span className="text-base">🛒</span>
+              <span>Cart ({cart.reduce((a, b) => a + b.quantity, 0)})</span>
+            </button>
+          </div>
+
+          {/* CART SLIDE-OVER DRAWER */}
+          {isCartOpen && (
+            <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/80 backdrop-blur-md transition-opacity">
+              <div className="w-full max-w-md bg-slate-900 border-l border-slate-800 h-full flex flex-col justify-between shadow-2xl p-6 overflow-y-auto">
+                
+                <div>
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <ShoppingBagIcon className="w-5 h-5 text-fuchsia-400" />
+                      <span>Service Cart ({cart.length})</span>
+                    </h3>
+                    <button onClick={() => setIsCartOpen(false)} className="text-slate-400 hover:text-slate-100 font-bold text-lg">✕</button>
+                  </div>
+
+                  {cart.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="text-4xl mb-3">🛒</div>
+                      <p className="text-xs text-slate-400">Your cart is empty. Choose a service to schedule.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 mb-6">
+                      {cart.map((item, idx) => (
+                        <div key={idx} className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3">
+                          <div className="flex-grow">
+                            <h5 className="text-xs font-bold text-slate-100 line-clamp-1">{item.name}</h5>
+                            <div className="text-[11px] font-mono text-fuchsia-300 font-bold">₹{item.price * item.quantity}</div>
+                          </div>
+
+                          <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1">
+                            <button onClick={() => updateQuantity(item.id, -1, item.name)} className="text-xs text-slate-400 hover:text-white px-1"> - </button>
+                            <span className="text-xs font-bold font-mono px-1">{item.quantity}</span>
+                            <button onClick={() => updateQuantity(item.id, 1, item.name)} className="text-xs text-slate-400 hover:text-white px-1"> + </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Promo Code */}
+                      <div className="pt-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder="Coupon (PAINT15 / PEST20)"
+                            value={promoCode}
+                            onChange={(e) => setPromoCode(e.target.value)}
+                            className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none flex-grow uppercase"
+                          />
+                          <button onClick={() => handleApplyCoupon()} className="bg-slate-800 hover:bg-slate-700 text-fuchsia-300 font-bold text-xs px-3 py-2 rounded-xl border border-slate-700">
+                            Apply
+                          </button>
+                        </div>
+                        {couponError && <p className="text-[10px] text-rose-400 mt-1">{couponError}</p>}
+                      </div>
+
+                      {/* Slot & Payment Options */}
+                      <div className="space-y-3 pt-2">
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">Select Schedule Slot</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {['Today', 'Tomorrow'].map((d) => (
+                              <button
+                                key={d}
+                                onClick={() => setSelectedDate(d)}
+                                className={`py-1.5 rounded-xl text-xs font-semibold border ${selectedDate === d ? 'bg-fuchsia-600 text-white border-fuchsia-400' : 'bg-slate-950 text-slate-400 border-slate-800'}`}
+                              >
+                                {d}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">Select Payment Mode</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[
+                              { id: 'pay_after', label: '💵 Cash After' },
+                              { id: 'upi', label: '📱 UPI / QR' },
+                              { id: 'card', label: '💳 Cards' }
+                            ].map((m) => (
+                              <button
+                                key={m.id}
+                                onClick={() => setPaymentMethod(m.id)}
+                                className={`py-1.5 rounded-xl text-[10px] font-bold border transition-colors ${paymentMethod === m.id ? 'bg-brand-500 text-slate-950 border-brand-400' : 'bg-slate-950 text-slate-400 border-slate-800'}`}
+                              >
+                                {m.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Price Summary */}
+                      <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1.5 text-xs text-slate-300">
+                        <div className="flex justify-between">
+                          <span>Service Subtotal</span>
+                          <span className="font-mono">₹{rawSubtotal}</span>
+                        </div>
+                        {isUcPlus && (
+                          <div className="flex justify-between text-amber-300 font-semibold">
+                            <span>7S Plus Discount (10%)</span>
+                            <span className="font-mono">-₹{ucPlusDiscount}</span>
+                          </div>
+                        )}
+                        {appliedDiscount > 0 && (
+                          <div className="flex justify-between text-fuchsia-300 font-semibold">
+                            <span>Coupon Discount ({promoCode})</span>
+                            <span className="font-mono">-₹{appliedDiscount}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between border-t border-slate-800 pt-2 font-extrabold text-sm text-slate-100">
+                          <span>Total Amount</span>
+                          <span className="font-mono text-brand-400">₹{grandTotal}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {cart.length > 0 && (
+                  <button
+                    onClick={handleCheckout}
+                    className="w-full bg-gradient-to-r from-fuchsia-600 via-purple-600 to-brand-500 text-white font-extrabold py-3.5 rounded-2xl text-sm shadow-xl shadow-fuchsia-500/25 active:scale-95 transition-all"
+                  >
+                    Confirm & Schedule Service (₹{grandTotal})
+                  </button>
+                )}
+
+              </div>
+            </div>
+          )}
+
+          {/* SERVICE DETAIL MODAL */}
+          {selectedServiceDetail && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+              <div className="glass-panel max-w-lg w-full rounded-3xl p-6 border border-slate-800 space-y-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-bold text-base text-slate-100">{selectedServiceDetail.name}</h3>
+                  <button onClick={() => setSelectedServiceDetail(null)} className="text-slate-400 hover:text-white font-bold">✕</button>
+                </div>
+
+                <div className="text-xs text-slate-300 space-y-3">
+                  <p>{selectedServiceDetail.description}</p>
+                  
+                  <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-200">
+                    ⚠️ <strong>Saman / Spare Material Policy:</strong> Doorstep execution labor charge is calculated based on standardized rates. Paint cans, switches, valves, or copper pipes are charged extra on actual market prices.
+                  </div>
+
+                  <div>
+                    <h5 className="font-bold text-brand-400 mb-1">What is Included:</h5>
+                    <ul className="list-disc pl-4 space-y-1 text-slate-300">
+                      {selectedServiceDetail.inclusions.map((inc, i) => (
+                        <li key={i}>{inc}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-bold text-rose-400 mb-1">Exclusions:</h5>
+                    <ul className="list-disc pl-4 space-y-1 text-slate-400">
+                      {selectedServiceDetail.exclusions.map((exc, i) => (
+                        <li key={i}>{exc}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => { addToCart(selectedServiceDetail); setSelectedServiceDetail(null); }}
+                  className="w-full bg-fuchsia-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-fuchsia-500"
+                >
+                  Add to Cart (₹{selectedServiceDetail.price})
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* LOCATION SELECTOR MODAL */}
+          {isLocationModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+              <div className="glass-panel max-w-sm w-full rounded-3xl p-6 border border-slate-800 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-sm text-slate-100">Select Operating City</h3>
+                  <button onClick={() => setIsLocationModalOpen(false)} className="text-slate-400 hover:text-white font-bold">✕</button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {CITIES.map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => { setSelectedCity(city); setIsLocationModalOpen(false); showToast(`City set to ${city}`); }}
+                      className={`p-3 rounded-xl text-xs font-semibold border text-left flex items-center justify-between ${selectedCity === city ? 'bg-fuchsia-600 text-white border-fuchsia-400 font-bold' : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'}`}
+                    >
+                      <span>📍 {city}</span>
+                      {selectedCity === city && <span>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TOAST NOTIFICATION */}
+          {toastMessage && (
+            <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-fuchsia-500/50 text-slate-100 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-bounce">
+              <span>✨ {toastMessage}</span>
+            </div>
+          )}
+
+          {/* FLOATING WHATSAPP BUTTON */}
+          <a
+            href={WHATSAPP_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-40 bg-emerald-500 hover:bg-emerald-400 text-slate-950 p-3.5 rounded-2xl shadow-2xl shadow-emerald-500/40 flex items-center gap-2 font-bold text-xs transition-transform hover:scale-105 active:scale-95"
+          >
+            <WhatsAppIcon className="w-5 h-5 fill-slate-950" />
+            <span className="hidden md:inline">WhatsApp Quick Booking</span>
+          </a>
+
+          {/* FOOTER */}
+          <footer className="mt-auto border-t border-slate-800/80 bg-slate-950 py-8 px-4 text-xs text-slate-400">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <div className="font-bold text-slate-200">7S Home Service © 2026</div>
+                <div className="text-[11px] text-slate-500">Express Painting (₹40/sq.ft), Wall Waterproofing, Electrician, Plumber & Car Wash in Morbi, Gandhidham, Rajkot & Jamnagar</div>
+              </div>
+              <div className="flex items-center gap-4 text-slate-400">
+                <a href={`tel:${CONTACT_PHONE}`} className="hover:text-fuchsia-400 flex items-center gap-1">
+                  <PhoneIcon className="w-3.5 h-3.5" /> +91 {CONTACT_PHONE}
+                </a>
+                <span>•</span>
+                <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-fuchsia-400">
+                  {CONTACT_EMAIL}
+                </a>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<SevenSHomeServiceApp />);
+  </script>
+</body>
+</html>
